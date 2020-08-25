@@ -1,19 +1,19 @@
 
 #$ docker build -t aspnetapp . $ docker run -d -p 8080:80 --name myapp aspnetapp
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
-WORKDIR /app
+FROM php:5.6-apache
 
-# Copy csproj and restore as distinct layers
-#COPY *.asphx ./
-#RUN dotnet restore
+#RUN apt-get update && apt-get install -y sqlite3 libsqlite3 \
+#&& docker-php-ext-install pdo pdo_sqlite \
+#&& docker-php-ext-install OpenSSL \
+#&& docker-php-ext-install cURL
 
 # Copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o out
+COPY ./proxy.php /var/www/html/
+COPY ./proxy.config /var/www/html/
+#RUN service apache2 restart
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
-WORKDIR /app
-COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+WORKDIR /var/www/html/
+
+EXPOSE 80
